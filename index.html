@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#b40018"><title>Mambemba Business — V3.1</title>
+<link rel="manifest" href="./manifest.json">
+<style>
+:root{--red:#b40018;--black:#111;--white:#fff;--blue:#174ea6;--green:#16823b;--bg:#f4f5f7;--line:#e4e7ec;--muted:#667085}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#161616}button,input,select{font:inherit}button{cursor:pointer}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#0b0b0b 0 48%,var(--red) 48%)}.card{background:#fff;border-radius:22px;padding:28px;box-shadow:0 25px 80px #0005;width:min(440px,100%)}.brand{font-weight:900}.brand i{font-style:normal;color:var(--red)}h1{margin:10px 0}.muted{color:var(--muted)}label{display:block;font-size:12px;font-weight:800;margin:10px 0 5px}input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff}.btn{border:0;border-radius:10px;padding:10px 13px;font-weight:800}.primary{background:var(--red);color:#fff}.dark{background:#111;color:#fff}.green{background:var(--green);color:#fff}.blue{background:var(--blue);color:#fff}.outline{background:#fff;border:1px solid var(--line)}
+#app{display:none}.top{height:64px;background:#111;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:5}.nav{display:flex;gap:5px}.nav button{background:transparent;color:#fff;border:0;padding:9px}.nav .active{background:#ffffff18;border-radius:8px}.wrap{max-width:1280px;margin:auto;padding:16px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:15px 0}.stat,.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px}.stat small{color:var(--muted)}.stat b{display:block;font-size:22px;margin-top:5px}.orders{display:grid;gap:10px}.order{border:1px solid var(--line);border-left:6px solid var(--red);border-radius:12px;padding:13px}.order.done{border-left-color:var(--green)}.oh{display:flex;justify-content:space-between;gap:10px}.name{font-weight:900;font-size:16px}.status{border-radius:999px;padding:6px 9px;font-size:11px;font-weight:900}.pending{background:#fff0f2;color:var(--red)}.done{background:#eaf8ef;color:var(--green)}.meta{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}.meta span{background:#f8f8f8;border-radius:8px;padding:7px}.actions{display:flex;gap:6px;flex-wrap:wrap}.modal{position:fixed;inset:0;background:#0008;z-index:20;overflow:auto;padding:15px}.modal>div{background:#fff;width:min(850px,100%);margin:20px auto;padding:18px;border-radius:18px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.hidden{display:none!important}.photo{width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}.table{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left}.danger{background:#fff0f2;color:#b40018}
+@media(max-width:800px){.nav{display:none}.stats{grid-template-columns:1fr 1fr}.meta,.grid{grid-template-columns:1fr}.wrap{padding:10px}}
+</style></head>
+<body>
+<div id="login" class="login"><div class="card">
+<div class="brand">MAMBEMBA <i>BUSINESS</i></div><h1>Gestão V3.1</h1><p class="muted">Sistema online de encomendas, entregas e gestão.</p>
+<label>Utilizador</label><input id="user" autocomplete="username" value="Admin">
+<label>Palavra-passe</label><input id="pass" type="password" autocomplete="current-password">
+<button class="btn primary" style="width:100%;margin-top:15px" onclick="login()">ENTRAR</button>
+</div></div>
+<div id="app">
+<header class="top"><div class="brand">MAMBEMBA <i>BUSINESS</i></div><div class="nav">
+<button class="active" onclick="page('dash',this)">Painel</button><button onclick="page('orders',this)">Encomendas</button><button onclick="page('clients',this)">Clientes</button><button onclick="page('team',this)">Equipa</button><button onclick="page('finance',this)">Financeiro</button></div><div style="display:flex;gap:6px"><button class="btn primary" onclick="openForm()">＋ Encomenda</button><button class="btn outline" onclick="logout()">Sair</button></div></header>
+<main class="wrap">
+<section id="dash"><div class="toolbar"><div><h2>Entregas</h2><div class="muted" id="date"></div></div><div><button class="btn outline" onclick="shift(-1)">‹</button><button class="btn outline" onclick="today()">Hoje</button><button class="btn outline" onclick="shift(1)">›</button></div></div>
+<div class="stats"><div class="stat"><small>Entregas</small><b id="s1">0</b></div><div class="stat"><small>Entregues</small><b id="s2">0</b></div><div class="stat"><small>Pendentes</small><b id="s3">0</b></div><div class="stat"><small>Produtos</small><b id="s4">0 Kz</b></div><div class="stat"><small>Total</small><b id="s5">0 Kz</b></div></div>
+<div class="panel"><h3>Entregas do dia</h3><div id="todayOrders" class="orders"></div></div></section>
+<section id="orders" class="hidden"><div class="toolbar"><h2>Encomendas</h2><input id="search" placeholder="Pesquisar cliente, produto, contacto..." oninput="renderOrders()" style="max-width:360px"></div><div class="panel"><div id="allOrders" class="orders"></div></div></section>
+<section id="clients" class="hidden"><h2>Clientes</h2><div class="panel"><div id="clientList" class="table"></div></div></section>
+<section id="team" class="hidden"><div class="toolbar"><h2>Equipa</h2><button class="btn primary" onclick="invite()">＋ Utilizador</button></div><div class="panel"><div id="teamList"></div></div></section>
+<section id="finance" class="hidden"><h2>Financeiro</h2><div class="panel"><div id="financeBox"></div></div></section>
+</main></div>
+
+<div id="modal" class="modal hidden"><div><div class="toolbar"><h2>Encomenda</h2><button class="btn outline" onclick="closeForm()">✕</button></div>
+<form id="form" onsubmit="saveOrder(event)">
+<input type="hidden" id="id">
+<div class="grid">
+<div><label>Nome do cliente *</label><input id="name" required></div><div><label>Género *</label><select id="gender" required><option value="">Selecionar</option><option>Feminino</option><option>Masculino</option><option>Outro</option></select></div>
+<div><label>Contacto *</label><input id="phone" required></div><div><label>WhatsApp</label><input id="whatsapp"></div>
+<div><label>Localização *</label><input id="location" required></div><div><label>Local de entrega *</label><input id="deliveryLocation" required></div>
+<div><label>Data *</label><input id="deliveryDate" type="date" required></div><div><label>Horário *</label><input id="deliveryTime" type="time" required></div>
+<div><label>Categoria *</label><select id="category" onchange="rules()" required><option value="">Selecionar</option><option>Roupa</option><option>Calçado/Tênis</option><option>Bolsa</option><option>Acessório</option><option>Perfume</option><option>Outro</option></select></div>
+<div><label>Produto *</label><input id="product" required></div><div><label>Custo (Kz) *</label><input id="cost" type="number" min="0" required></div><div><label>Táxi (Kz) *</label><input id="taxi" type="number" min="0" required></div>
+<div><label id="cl">Cor *</label><input id="color"></div><div><label id="sl">Tamanho *</label><input id="size"></div>
+<div class="full"><label>Foto do produto</label><input id="photo" type="file" accept="image/*"><small class="muted">Máximo 5 MB.</small></div>
+<div class="full"><label>Observações</label><input id="notes"></div><div class="full"><label><input id="news" type="checkbox" style="width:auto"> Cliente autoriza novidades.</label></div>
+</div><div style="display:flex;justify-content:flex-end;gap:7px;margin-top:15px"><button type="button" class="btn outline" onclick="closeForm()">Cancelar</button><button class="btn primary">Guardar</button></div></form></div></div>
+
+<script>
+const API=localStorage.getItem("mb_api")||"https://mambemba-business-api.onrender.com/api";
+let token=localStorage.getItem("mb_token"), orders=[], cur=new Date();cur.setHours(0,0,0,0);
+const $=x=>document.getElementById(x), money=n=>Number(n||0).toLocaleString("pt-AO")+" Kz", date=s=>new Date(s+"T00:00:00").toLocaleDateString("pt-PT");
+async function api(path,opt={}){opt.headers={...(opt.headers||{}),...(token?{"Authorization":"Bearer "+token}:{})};if(!(opt.body instanceof FormData)&&opt.body)opt.headers["Content-Type"]="application/json";let r=await fetch(API+path,opt);if(!r.ok){let t=await r.text();throw Error(t)}return r.json()}
+async function login(){try{let x=await api("/auth/login",{method:"POST",body:JSON.stringify({username:$("user").value,password:$("pass").value})});token=x.token;localStorage.setItem("mb_token",token);localStorage.setItem("mb_user",JSON.stringify(x.user));show()}catch(e){alert("Não foi possível entrar.")}
+}
+function logout(){localStorage.removeItem("mb_token");localStorage.removeItem("mb_user");token=null;location.reload()}
+function show(){$("login").style.display="none";$("app").style.display="block";load()}
+if(token)show();
+async function load(){try{orders=await api("/orders");render()}catch(e){alert("Não foi possível ligar ao servidor. Verifique a API.")}}
+function page(id,btn){["dash","orders","clients","team","finance"].forEach(x=>$(x).classList.add("hidden"));$(id).classList.remove("hidden");document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));btn?.classList.add("active");if(id==="clients")clients();if(id==="team")team();if(id==="finance")finance();if(id==="orders")renderOrders()}
+function shift(n){cur.setDate(cur.getDate()+n);render()}function today(){cur=new Date();cur.setHours(0,0,0,0);render()}
+function render(){let d=cur.toISOString().slice(0,10),a=orders.filter(o=>o.deliveryDate===d);$("date").textContent=date(d);$("s1").textContent=a.length;$("s2").textContent=a.filter(o=>o.status==="done").length;$("s3").textContent=a.filter(o=>o.status!=="done").length;$("s4").textContent=money(a.reduce((s,o)=>s+Number(o.cost),0));$("s5").textContent=money(a.reduce((s,o)=>s+Number(o.cost)+Number(o.taxi),0));$("todayOrders").innerHTML=a.map(card).join("")||"<p class=muted>Sem entregas.</p>"}
+function card(o){return `<div class="order ${o.status==="done"?"done":""}"><div class="oh"><div><div class=name>${esc(o.name)}</div><div>${esc(o.product)}</div></div><span class="status ${o.status==="done"?"done":"pending"}">${o.status==="done"?"ENTREGUE":"PENDENTE"}</span></div>${o.photo?`<img class=photo src="${o.photo}" alt="Produto">`:""}<div class=meta><span>☎ ${esc(o.phone)}</span><span>◷ ${o.deliveryTime}</span><span>📍 ${esc(o.deliveryLocation)}</span><span>💰 ${money(o.cost+o.taxi)}</span></div><div class=actions><button class="btn blue" onclick="location.href='tel:${esc(o.phone)}'">☎ Ligar</button>${o.whatsapp?`<button class="btn green" onclick="wa('${esc(o.whatsapp)}')">WhatsApp</button>`:""}<button class="btn dark" onclick="receipt('${o.id}')">🧾 Recibo A4</button><button class="btn outline" onclick="share('${o.id}')">↗ Partilhar</button><button class="btn outline" onclick="edit('${o.id}')">✏ Editar</button><button class="btn ${o.status==="done"?"outline":"green"}" onclick="toggle('${o.id}')">${o.status==="done"?"↩ Reabrir":"✅ Entregue"}</button></div></div>`}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function renderOrders(){let q=($("search").value||"").toLowerCase();$("allOrders").innerHTML=orders.filter(o=>(o.name+" "+o.product+" "+o.phone).toLowerCase().includes(q)).sort((a,b)=>(b.deliveryDate+b.deliveryTime).localeCompare(a.deliveryDate+a.deliveryTime)).map(card).join("")}
+async function toggle(id){await api("/orders/"+id+"/status",{method:"PATCH",body:JSON.stringify({status:orders.find(o=>o.id===id).status==="done"?"pending":"done"})});await load()}
+function openForm(o=null){$("modal").classList.remove("hidden");$("form").reset();$("id").value=o?.id||"";$("deliveryDate").value=o?.deliveryDate||cur.toISOString().slice(0,10);if(o){["name","gender","phone","whatsapp","location","deliveryLocation","deliveryDate","deliveryTime","category","product","cost","taxi","color","size","notes"].forEach(k=>$(k).value=o[k]??"");$("news").checked=!!o.news)}rules()}
+function closeForm(){$("modal").classList.add("hidden")}
+function rules(){let p=$("category").value==="Perfume";$("color").required=!p;$("size").required=!p;$("cl").textContent=p?"Cor":"Cor *";$("sl").textContent=p?"Tamanho":"Tamanho *"}
+async function saveOrder(e){e.preventDefault();let fd=new FormData();["name","gender","phone","whatsapp","location","deliveryLocation","deliveryDate","deliveryTime","category","product","cost","taxi","color","size","notes"].forEach(k=>fd.append(k,$(k).value));fd.append("news",$("news").checked);if($("photo").files[0])fd.append("photo",$("photo").files[0]);let id=$("id").value;if(id)await api("/orders/"+id,{method:"PUT",body:fd});else await api("/orders",{method:"POST",body:fd});closeForm();await load()}
+function edit(id){openForm(orders.find(o=>o.id===id))}
+function wa(n){let x=n.replace(/\D/g,"");if(x.startsWith("0"))x="244"+x.slice(1);if(!x.startsWith("244"))x="244"+x;window.open("https://wa.me/"+x,"_blank")}
+async function receipt(id){let r=await api("/orders/"+id+"/receipt");window.open(r.url,"_blank")}
+async function share(id){let x=await api("/orders/"+id+"/share");let c=prompt("Partilhar recibo:\n1 WhatsApp\n2 E-mail\n3 SMS\n4 Abrir PDF");if(c==="1"&&x.whatsapp)window.open(x.whatsapp,"_blank");if(c==="2")location.href=x.email;if(c==="3"&&x.sms)location.href=x.sms;if(c==="4")window.open(x.url,"_blank")}
+async function clients(){let x=await api("/clients");$("clientList").innerHTML="<table><tr><th>Cliente</th><th>Contacto</th><th>Compras</th><th>Novidades</th></tr>"+x.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.phone)}</td><td>${c.orders}</td><td>${c.news?"✅":"—"}</td></tr>`).join("")+"</table>"}
+async function team(){let x=await api("/team");$("teamList").innerHTML=x.map(u=>`<div class=panel><b>${esc(u.name)}</b> — ${esc(u.username)} · ${esc(u.role)} · ${u.active?"Ativo":"Inativo"}</div>`).join("")}
+async function invite(){let name=prompt("Nome");if(!name)return;let username=prompt("Utilizador");if(!username)return;let password=prompt("Palavra-passe");if(!password)return;let role=prompt("Função: admin, gestor, vendedor, entregador ou financeiro","vendedor");if(!role)return;await api("/team",{method:"POST",body:JSON.stringify({name,username,password,role})});team()}
+async function finance(){let x=await api("/finance");$("financeBox").innerHTML=`<h3>Total: ${money(x.total)}</h3><p>Produtos: ${money(x.products)} · Táxi: ${money(x.taxi)}</p>`}
+</script>
+</body></html>
