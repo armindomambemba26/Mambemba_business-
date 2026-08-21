@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="pt-AO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Mambemba Business — Painel</title>
+<meta name="description" content="Painel de gestão de encomendas, clientes, equipa e financeiro — Mambemba Business.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b40018">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<section id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-header">
+      <h1 class="login-title"><span class="black-part">MAMBEMBA</span> <span class="red-part">BUSINESS</span></h1>
+      <h2 class="login-version">Gestão V3.2</h2>
+      <p class="login-subtitle">Sistema de gestão de encomendas, entregas e clientes.</p>
+    </div>
+    <form id="loginForm" class="login-form" autocomplete="off">
+      <div class="field">
+        <label for="loginUser">Utilizador</label>
+        <input type="text" id="loginUser" name="loginUser" autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="loginPass">Palavra-passe</label>
+        <div class="pass-wrap">
+          <input type="password" id="loginPass" name="loginPass" autocomplete="current-password">
+          <button type="button" id="togglePass" class="toggle-pass" aria-label="Mostrar palavra-passe">👁</button>
+        </div>
+      </div>
+      <p id="loginError" class="login-error" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block login-submit">ENTRAR</button>
+    </form>
+  </div>
+</section>
+
+<!-- ===================== VALIDAÇÃO PÚBLICA DE RECIBO ===================== -->
+<section id="validateScreen" class="validate-screen" hidden>
+  <div class="validate-card">
+    <div class="logo-mark small">MB</div>
+    <h2>MAMBEMBA BUSINESS</h2>
+    <h3>Validação de Recibo</h3>
+    <div id="validateBody" class="validate-body">
+      <p>A carregar…</p>
+    </div>
+    <p class="validate-disclaimer">
+      Esta validação é local ao navegador que gerou o recibo (sem servidor central).
+      Ela confirma que o código corresponde a um recibo emitido neste dispositivo/loja,
+      não substituindo verificação direta com a Mambemba Business.
+    </p>
+    <a href="#/dashboard" class="btn btn-outline btn-block" id="validateBackBtn">Voltar ao sistema</a>
+  </div>
+</section>
+
+<!-- ===================== APP / PAINEL ===================== -->
+<div id="app" class="app" hidden>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <button id="menuToggle" class="icon-btn menu-toggle" aria-label="Abrir menu">☰</button>
+    <div class="topbar-brand">
+      <div class="logo-mark tiny">MB</div>
+      <div class="topbar-titles">
+        <strong>MAMBEMBA BUSINESS</strong>
+        <span id="topbarUser">—</span>
+      </div>
+    </div>
+    <button id="logoutBtn" class="btn btn-outline btn-sm logout-btn">Sair</button>
+  </header>
+
+  <div class="app-body">
+    <!-- Sidebar / nav -->
+    <nav id="sidebar" class="sidebar">
+      <button class="nav-item" data-route="dashboard">📊 <span>Painel</span></button>
+      <button class="nav-item" data-route="encomendas">🧾 <span>Encomendas</span></button>
+      <button class="nav-item" data-route="clientes">👥 <span>Clientes</span></button>
+      <button class="nav-item" data-route="equipa">🧑‍💼 <span>Equipa</span></button>
+      <button class="nav-item" data-route="financeiro">💰 <span>Financeiro</span></button>
+      <button class="nav-item" data-route="definicoes">⚙️ <span>Definições</span></button>
+      <div class="sidebar-footer">
+        <span class="version-tag">v3.2 · GitHub Pages</span>
+      </div>
+    </nav>
+    <div id="sidebarOverlay" class="sidebar-overlay" hidden></div>
+
+    <!-- Main content -->
+    <main id="mainContent" class="main-content">
+
+      <!-- DASHBOARD -->
+      <section id="view-dashboard" class="view">
+        <h2 class="view-title">Painel Principal</h2>
+        <div class="stat-grid">
+          <div class="stat-card"><span class="stat-num" id="statEntregas">0</span><span class="stat-label">Encomendas</span></div>
+          <div class="stat-card ok"><span class="stat-num" id="statEntregues">0</span><span class="stat-label">Entregues</span></div>
+          <div class="stat-card warn"><span class="stat-num" id="statPendentes">0</span><span class="stat-label">Pendentes</span></div>
+          <div class="stat-card"><span class="stat-num" id="statProdutos">0</span><span class="stat-label">Produtos</span></div>
+          <div class="stat-card accent"><span class="stat-num" id="statTotal">0 Kz</span><span class="stat-label">Total</span></div>
+        </div>
+
+        <div class="section-head">
+          <h3>Entregas do dia</h3>
+        </div>
+        <div id="dashboardOrders" class="orders-grid"></div>
+      </section>
+
+      <!-- ENCOMENDAS -->
+      <section id="view-encomendas" class="view" hidden>
+        <div class="view-head-row">
+          <h2 class="view-title">Encomendas</h2>
+          <button class="btn btn-primary" id="newOrderBtn">+ Nova encomenda</button>
+        </div>
+
+        <div class="search-row">
+          <input type="text" id="orderSearch" placeholder="Pesquisar cliente, produto, contacto...">
+        </div>
+
+        <div class="filter-row">
+          <button class="chip active" data-filter="TODOS">Todos</button>
+          <button class="chip" data-filter="PENDENTE">Pendentes</button>
+          <button class="chip" data-filter="ENTREGUE">Entregues</button>
+        </div>
+
+        <div id="ordersList" class="orders-grid"></div>
+      </section>
+
+      <!-- CLIENTES -->
+      <section id="view-clientes" class="view" hidden>
+        <h2 class="view-title">Clientes</h2>
+        <div class="search-row">
+          <input type="text" id="clientSearch" placeholder="Pesquisar cliente...">
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="clientsTable">
+            <thead>
+              <tr><th>Cliente</th><th>Contacto</th><th>Compras</th><th>Novidades</th></tr>
+            </thead>
+            <tbody id="clientsTbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- EQUIPA -->
+      <section id="view-equipa" class="view" hidden>
+        <div class="view-head-row">
+          <h2 class="view-title">Equipa</h2>
+          <button class="btn btn-primary" id="newUserBtn">+ Novo utilizador</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="teamTable">
+            <thead>
+              <tr><th>Nome</th><th>Utilizador</th><th>Função</th><th>Estado</th><th>Ações</th></tr>
+            </thead>
+            <tbody id="teamTbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- FINANCEIRO -->
+      <section id="view-financeiro" class="view" hidden>
+        <h2 class="view-title">Financeiro</h2>
+        <div class="stat-grid">
+          <div class="stat-card accent"><span class="stat-num" id="finTotalGeral">0 Kz</span><span class="stat-label">Total geral</span></div>
+          <div class="stat-card"><span class="stat-num" id="finTotalProdutos">0 Kz</span><span class="stat-label">Total dos produtos</span></div>
+          <div class="stat-card"><span class="stat-num" id="finTotalTaxi">0 Kz</span><span class="stat-label">Total dos táxis</span></div>
+          <div class="stat-card"><span class="stat-num" id="finNumEncomendas">0</span><span class="stat-label">Nº de encomendas</span></div>
+        </div>
+        <div class="section-head"><h3>Resumo por estado</h3></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Estado</th><th>Encomendas</th><th>Total (Kz)</th></tr></thead>
+            <tbody id="finStatusTbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DEFINIÇÕES -->
+      <section id="view-definicoes" class="view" hidden>
+        <h2 class="view-title">Definições</h2>
+
+        <div class="settings-card">
+          <h3>Dados da loja</h3>
+          <div class="field">
+            <label for="cfg_nome">Nome da loja</label>
+            <input type="text" id="cfg_nome">
+          </div>
+          <div class="field">
+            <label for="cfg_slogan">Slogan</label>
+            <input type="text" id="cfg_slogan">
+          </div>
+          <button class="btn btn-primary" id="saveBrandBtn">Guardar</button>
+        </div>
+
+        <div class="settings-card">
+          <h3>Cópia de segurança</h3>
+          <p class="settings-hint">
+            Os dados deste sistema ficam guardados apenas neste navegador/dispositivo.
+            Exporte uma cópia de segurança regularmente — sobretudo antes de limpar o
+            navegador, trocar de telemóvel, ou publicar uma atualização no GitHub Pages.
+          </p>
+          <div class="settings-actions">
+            <button class="btn btn-outline" id="exportDataBtn">⬇️ Exportar dados (.json)</button>
+            <label class="btn btn-outline file-btn">⬆️ Importar dados (.json)
+              <input type="file" id="importDataInput" accept="application/json" hidden>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-card danger">
+          <h3>Zona de risco</h3>
+          <p class="settings-hint">
+            Apaga permanentemente todas as encomendas, clientes e fotos guardadas
+            neste dispositivo. A equipa e o nome/slogan da loja são mantidos.
+          </p>
+          <button class="btn btn-danger" id="resetDataBtn">🗑️ Apagar todos os dados</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===================== MODAL: FORM ENCOMENDA ===================== -->
+<div id="orderModal" class="modal-overlay" hidden>
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3 id="orderModalTitle">Nova encomenda</h3>
+      <button class="icon-btn" data-close-modal>✕</button>
+    </div>
+    <form id="orderForm" class="modal-body">
+      <input type="hidden" id="orderId">
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="f_cliente">Nome do cliente *</label>
+          <input type="text" id="f_cliente" required>
+        </div>
+        <div class="field">
+          <label for="f_genero">Género *</label>
+          <select id="f_genero" required>
+            <option value="">Selecionar…</option>
+            <option value="Feminino">Feminino</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f_contacto">Contacto *</label>
+          <input type="tel" id="f_contacto" required placeholder="9XX XXX XXX">
+        </div>
+        <div class="field">
+          <label for="f_whatsapp">WhatsApp</label>
+          <input type="tel" id="f_whatsapp" placeholder="9XX XXX XXX (se diferente)">
+        </div>
+        <div class="field">
+          <label for="f_localizacao">Localização *</label>
+          <input type="text" id="f_localizacao" required placeholder="Bairro / Referência">
+        </div>
+        <div class="field">
+          <label for="f_entrega_local">Local de entrega *</label>
+          <input type="text" id="f_entrega_local" required>
+        </div>
+        <div class="field">
+          <label for="f_data">Data *</label>
+          <input type="date" id="f_data" required>
+        </div>
+        <div class="field">
+          <label for="f_horario">Horário *</label>
+          <input type="time" id="f_horario" required>
+        </div>
+        <div class="field">
+          <label for="f_categoria">Categoria *</label>
+          <select id="f_categoria" required>
+            <option value="">Selecionar…</option>
+            <option value="Roupa">Roupa</option>
+            <option value="Calçado/Tênis">Calçado/Tênis</option>
+            <option value="Bolsa">Bolsa</option>
+            <option value="Acessório">Acessório</option>
+            <option value="Perfume">Perfume</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f_produto">Produto *</label>
+          <input type="text" id="f_produto" required>
+        </div>
+        <div class="field">
+          <label for="f_custo">Custo (Kz) *</label>
+          <input type="number" id="f_custo" min="0" step="1" required>
+        </div>
+        <div class="field">
+          <label for="f_taxi">Táxi (Kz) *</label>
+          <input type="number" id="f_taxi" min="0" step="1" required>
+        </div>
+        <div class="field" id="fieldCor">
+          <label for="f_cor">Cor *</label>
+          <input type="text" id="f_cor">
+        </div>
+        <div class="field" id="fieldTamanho">
+          <label for="f_tamanho">Tamanho *</label>
+          <input type="text" id="f_tamanho">
+        </div>
+        <small class="field-hint field-full" id="perfumeHint" hidden>Cor e tamanho não são obrigatórios para a categoria Perfume.</small>
+        <div class="field field-full">
+          <label for="f_foto">Foto do produto *</label>
+          <input type="file" id="f_foto" accept="image/*">
+          <img id="fotoPreview" class="foto-preview" hidden alt="Pré-visualização do produto">
+        </div>
+        <div class="field field-full">
+          <label for="f_obs">Observações</label>
+          <textarea id="f_obs" rows="2"></textarea>
+        </div>
+        <div class="field field-full checkbox-field">
+          <label><input type="checkbox" id="f_autoriza"> Cliente autoriza receber novidades</label>
+        </div>
+      </div>
+
+      <div class="modal-total">Total: <strong id="f_totalPreview">0 Kz</strong></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" data-close-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar encomenda</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: RECIBO ===================== -->
+<div id="receiptModal" class="modal-overlay" hidden>
+  <div class="modal modal-lg">
+    <div class="modal-head no-print">
+      <h3>Recibo</h3>
+      <button class="icon-btn" data-close-modal>✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="receiptA4" class="receipt-a4"></div>
+      <div class="modal-actions no-print">
+        <button type="button" class="btn btn-outline" id="shareReceiptBtn">Partilhar</button>
+        <button type="button" class="btn btn-primary" id="printReceiptBtn">Imprimir Recibo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: PARTILHA ===================== -->
+<div id="shareModal" class="modal-overlay" hidden>
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h3>Partilhar recibo</h3>
+      <button class="icon-btn" data-close-modal>✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="settings-hint">O recibo é enviado em PDF através da folha de partilha do telemóvel.</p>
+      <button class="share-option" id="shareWhatsapp">🟢 WhatsApp</button>
+      <button class="share-option" id="shareEmail">✉️ E-mail</button>
+      <button class="share-option" id="shareSms">💬 SMS (apenas texto)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: NOVO UTILIZADOR ===================== -->
+<div id="userModal" class="modal-overlay" hidden>
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h3 id="userModalTitle">Novo utilizador</h3>
+      <button class="icon-btn" data-close-modal>✕</button>
+    </div>
+    <form id="userForm" class="modal-body">
+      <input type="hidden" id="u_id">
+      <div class="field">
+        <label for="u_nome">Nome *</label>
+        <input type="text" id="u_nome" required>
+      </div>
+      <div class="field">
+        <label for="u_user">Utilizador *</label>
+        <input type="text" id="u_user" required>
+      </div>
+      <div class="field">
+        <label for="u_pass">Palavra-passe *</label>
+        <input type="password" id="u_pass">
+        <small class="field-hint" id="u_passHint">Mínimo 4 caracteres.</small>
+      </div>
+      <div class="field">
+        <label for="u_funcao">Função *</label>
+        <select id="u_funcao" required>
+          <option value="Admin">Admin</option>
+          <option value="Gestor">Gestor</option>
+          <option value="Vendedor">Vendedor</option>
+          <option value="Entregador">Entregador</option>
+          <option value="Financeiro">Financeiro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="u_estado">Estado</label>
+        <select id="u_estado">
+          <option value="Ativo">Ativo</option>
+          <option value="Inativo">Inativo</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" data-close-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== CONFIRM DIALOG (genérico) ===================== -->
+<div id="confirmModal" class="modal-overlay" hidden>
+  <div class="modal modal-sm">
+    <div class="modal-body">
+      <p id="confirmMessage" class="confirm-message"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" id="confirmCancelBtn">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmOkBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TOAST ===================== -->
+<div id="toast" class="toast" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+<script src="qrcode.js"></script>
+<script src="firebase-sync.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

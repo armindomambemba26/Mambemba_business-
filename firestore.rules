@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function profile() { return get(/databases/$(database)/documents/businesses/mambemba-business/users/$(request.auth.uid)).data; }
+    function role() { return profile().role; }
+    function isAdmin() { return signedIn() && role() == 'Admin'; }
+    function canReadOps() { return signedIn() && role() in ['Admin','Gestor','Vendedor','Entregador','Financeiro']; }
+    function canWriteOrders() { return signedIn() && role() in ['Admin','Gestor','Vendedor']; }
+
+    match /businesses/mambemba-business/meta/{doc} {
+      allow read: if canReadOps();
+      allow write: if isAdmin() || (doc == 'main' && signedIn() && role() in ['Gestor','Vendedor','Financeiro']);
+    }
+    match /businesses/mambemba-business/orders/{orderId} {
+      allow read: if canReadOps();
+      allow create, update: if canWriteOrders();
+      allow delete: if isAdmin() || role() == 'Gestor';
+    }
+    match /businesses/mambemba-business/clients/{clientId} {
+      allow read: if canReadOps();
+      allow create, update: if signedIn() && role() in ['Admin','Gestor','Vendedor'];
+      allow delete: if isAdmin() || role() == 'Gestor';
+    }
+    match /businesses/mambemba-business/users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isAdmin() || (request.auth.uid == uid && request.resource.data.role == 'Admin' && request.resource.data.user == 'Admin');
+      allow update: if isAdmin() || request.auth.uid == uid;
+      allow delete: if isAdmin();
+    }
+  }
+}
