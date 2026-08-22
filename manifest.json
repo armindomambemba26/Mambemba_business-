@@ -1,0 +1,13 @@
+{
+  "name": "Mambemba Business — Painel",
+  "short_name": "Mambemba",
+  "description": "Gestão de encomendas, clientes, equipa e financeiro — Mambemba Business.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f5f7",
+  "theme_color": "#b40018",
+  "lang": "pt-AO",
+  "icons": []
+}
